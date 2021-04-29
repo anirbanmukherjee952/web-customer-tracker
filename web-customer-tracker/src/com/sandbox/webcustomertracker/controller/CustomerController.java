@@ -5,22 +5,23 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-import com.sandbox.webcustomertracker.dao.CustomerDAO;
 import com.sandbox.webcustomertracker.entity.Customer;
+import com.sandbox.webcustomertracker.service.CustomerService;
 
 @Controller
 @RequestMapping("/customer")
 public class CustomerController {
 
 	@Autowired
-	private CustomerDAO customerDAO;
+	private CustomerService customerService;
 	
-	@RequestMapping("/list")
+	@GetMapping("/list")
 	public String listCustomers(Model theModel) {
 		
-		List<Customer> customers = customerDAO.getCustomers();
+		List<Customer> customers = customerService.getCustomers();
 		
 		theModel.addAttribute("customers",customers);
 		
