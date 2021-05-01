@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.sandbox.webcustomertracker.SortBy;
 import com.sandbox.webcustomertracker.entity.Customer;
 import com.sandbox.webcustomertracker.service.CustomerService;
 
@@ -22,13 +23,24 @@ public class CustomerController {
 	private CustomerService customerService;
 	
 	@GetMapping("/list")
-	public String listCustomers(Model theModel) {
+	public String listCustomers(@RequestParam(name="sort",required=false) String sort,
+								Model theModel) {
 		
-		// fetch customers from DB
-		List<Customer> customers = customerService.getCustomers();
+		// get customers from the service
+		List<Customer> theCustomers = null;
+		
+		// check for sort field
+		if (sort != null) {
+			int theSortField = Integer.parseInt(sort);
+			theCustomers = customerService.getCustomers(theSortField);			
+		}
+		else {
+			// no sort field provided ... default to sorting by last name
+			theCustomers = customerService.getCustomers(SortBy.lastName.ordinal());
+		}
 		
 		// add them to model
-		theModel.addAttribute("customers",customers);
+		theModel.addAttribute("customers",theCustomers);
 		
 		return "list-customers";
 		
@@ -53,7 +65,7 @@ public class CustomerController {
 		// save the customer into DB
 		customerService.saveCustomer(theCustomer);
 		
-		return "redirect:/customer/list";
+		return "redirect:/customer/list?page=1";
 	
 	}
 	
@@ -70,6 +82,30 @@ public class CustomerController {
 		return "customer-form";
 		
 	}
+	
+	@GetMapping("/delete-customer")
+	public String deleteCustomer(@RequestParam("customerId") int theId) {
+		
+		// delete the customer
+		customerService.deleteCustomer(theId);
+		
+		return "redirect:/customer/list?page=1";
+		
+	}
+	
+	@GetMapping("/search")
+    public String searchCustomers(@RequestParam("theSearchName") String theSearchName,
+    							Model theModel) {
+		
+ 		// search customers from the service
+ 		List<Customer> theCustomers = customerService.searchCustomers(theSearchName);
+ 		            
+        // add the customers to the model
+        theModel.addAttribute("customers", theCustomers);
+        
+        return "list-customers";   
+        
+    }
 	
 }
 
